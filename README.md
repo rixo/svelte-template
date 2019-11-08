@@ -5,7 +5,7 @@ Experiment with `rollup-plugin-svelte` ([fork](https://github.com/rollup/rollup-
 ## Usage
 
 ~~~bash
-npx degit rixo/template#treeshake-hmr demo
+npx degit rixo/svelte-template#treeshake-css demo
 cd demo
 npm install
 npm run build
