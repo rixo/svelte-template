@@ -1,4 +1,4 @@
-import svelte from 'rollup-plugin-svelte';
+import svelte from 'rollup-plugin-svelte-hot';
 import resolve from '@rollup/plugin-node-resolve';
 import commonjs from 'rollup-plugin-commonjs';
 import livereload from 'rollup-plugin-livereload';
@@ -7,6 +7,7 @@ import { config } from '@sveltech/routify'
 
 const split = config.dynamicImports
 const production = !process.env.ROLLUP_WATCH;
+const nollup = !!process.env.NOLLUP;
 
 export default {
 	input: 'src/main.js',
@@ -14,7 +15,7 @@ export default {
 		sourcemap: true,
 		name: 'app',
 		format: split ? 'esm' : 'iife',
-		[split ? 'dir' : 'file']: split ? 'public/build' : 'public/build/bundle.js'
+		[split ? 'dir' : 'file']: split ? 'public' : 'public/build/bundle.js'
 	},
 	plugins: [
 		svelte({
@@ -22,9 +23,19 @@ export default {
 			dev: !production,
 			// we'll extract any component CSS out into
 			// a separate file — better for performance
-			css: css => {
-				css.write('public/build/bundle.css');
-			}
+			...production && {
+				css: css => {
+					css.write('public/build/bundle.css');
+				}
+			},
+      hot: !production && {
+        // optimistic will try to recover from runtime
+        // errors during component init
+        optimistic: true,
+        // turn on to disable preservation of local component
+        // state -- i.e. non exported `let` variables
+        noPreserveState: false,
+      },
 		}),
 
 		// If you have external dependencies installed from
@@ -40,11 +51,11 @@ export default {
 
 		// In dev mode, call `npm run start` once
 		// the bundle has been generated
-		!production && serve(),
+		!nollup && !production && serve(),
 
 		// Watch the `public` directory and refresh the
 		// browser on changes when not in production
-		!production && livereload('public'),
+		// !production && livereload('public'),
 
 		// If we're building for production (npm run build
 		// instead of npm run dev), minify
